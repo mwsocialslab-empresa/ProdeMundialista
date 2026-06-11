@@ -162,6 +162,12 @@ if (toggleAuth) {
 if (authForm) {
     authForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        // Efecto visual para saber que está trabajando
+        const textoOriginal = btnSubmit.innerText;
+        btnSubmit.innerText = "Procesando...";
+        btnSubmit.disabled = true;
+
         const email = document.getElementById('auth-email').value.toLowerCase().trim();
         const pass = document.getElementById('auth-password').value;
         const nombre = authNombre.value.trim();
@@ -175,7 +181,7 @@ if (authForm) {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const user = userCredential.user;
                 
-                // Guardamos el apodo en la base de datos
+                // Guardamos el apodo
                 await setDoc(doc(db, "Perfiles", user.uid), {
                     nombre: nombre || "Participante",
                     email: user.email
@@ -185,7 +191,7 @@ if (authForm) {
         } catch (error) {
             console.error("Error:", error);
             if (error.code === 'auth/email-already-in-use') {
-                alert("Este email ya está registrado. Por favor, haz clic en 'Ingresa aquí'.");
+                alert("Este email ya está registrado. Cambiá a la opción de 'Ingresar'.");
             } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
                 alert("Email o contraseña incorrectos.");
             } else if (error.code === 'auth/weak-password') {
@@ -193,6 +199,10 @@ if (authForm) {
             } else {
                 alert("Error: " + error.message);
             }
+        } finally {
+            // Restauramos el botón vuelva a su estado normal
+            btnSubmit.innerText = textoOriginal;
+            btnSubmit.disabled = false;
         }
     });
 }
