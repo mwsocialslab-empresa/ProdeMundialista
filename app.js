@@ -19,10 +19,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Elementos del DOM
+// Elementos del DOM principales
 const authSection = document.getElementById('auth-section');
 const appContent = document.getElementById('app-content');
-const loginForm = document.getElementById('login-form');
 const mainNav = document.getElementById('main-nav');
 const btnFixture = document.getElementById('btn-fixture');
 const btnRanking = document.getElementById('btn-ranking');
@@ -38,11 +37,16 @@ const goleadoresSection = document.getElementById('goleadores-section');
 const gruposContainer = document.getElementById('grupos-container');
 const goleadoresContainer = document.getElementById('goleadores-container');
 
+// Elementos del DOM para Login y Registro
+const authForm = document.getElementById('auth-form');
+const authTitle = document.getElementById('auth-title');
+const groupNombre = document.getElementById('group-nombre');
+const authNombre = document.getElementById('auth-nombre');
+const btnSubmit = document.getElementById('auth-submit-btn');
+const toggleAuth = document.getElementById('toggle-auth');
+
 // ------------------------------------------------------------------
 // DICCIONARIO TRADUCTOR Y BANDERAS
-// ------------------------------------------------------------------
-// ------------------------------------------------------------------
-// DICCIONARIO MAESTRO DE PAÍSES (Asegúrate de agregar aquí si alguno falta)
 // ------------------------------------------------------------------
 const diccionarioPaises = {
     "Argentina": { es: "Argentina", flag: "ar" },
@@ -83,63 +87,115 @@ const diccionarioPaises = {
     "Nigeria": { es: "Nigeria", flag: "ng" },
     "Paraguay": { es: "Paraguay", flag: "py" },
     "Bolivia": { es: "Bolivia", flag: "bo" },
-    "Venezuela": { es: "Venezuela", flag: "ve" }
+    "Venezuela": { es: "Venezuela", flag: "ve" },
+    "South Africa": { es: "Sudáfrica", flag: "za" },
+    "Czechia": { es: "Rep. Checa", flag: "cz" },
+    "Bosnia-Herzegovina": { es: "Bosnia", flag: "ba" },
+    "Haiti": { es: "Haití", flag: "ht" },
+    "Scotland": { es: "Escocia", flag: "gb-sct" },
+    "Turkey": { es: "Turquía", flag: "tr" },
+    "Curaçao": { es: "Curazao", flag: "cw" },
+    "Ivory Coast": { es: "Costa de Marfil", flag: "ci" },
+    "Sweden": { es: "Suecia", flag: "se" },
+    "Cape Verde Islands": { es: "Cabo Verde", flag: "cv" },
+    "Egypt": { es: "Egipto", flag: "eg" },
+    "New Zealand": { es: "N. Zelanda", flag: "nz" },
+    "Iraq": { es: "Irak", flag: "iq" },
+    "Norway": { es: "Noruega", flag: "no" },
+    "Algeria": { es: "Argelia", flag: "dz" },
+    "Austria": { es: "Austria", flag: "at" },
+    "Jordan": { es: "Jordania", flag: "jo" },
+    "Congo DR": { es: "Congo", flag: "cd" },
+    "Panama": { es: "Panamá", flag: "pa" },
+    "Uzbekistan": { es: "Uzbekistán", flag: "uz" }
 };
 
 function obtenerInfoPais(nombreApi) {
-    // Intentamos buscar el país en el diccionario
-    const info = diccionarioPaises[nombreApi];
-    
-    if (info) {
-        return { 
-            nombre: info.es, 
-            bandera: `https://flagcdn.com/w80/${info.flag}.png` 
-        };
+    if (!nombreApi || nombreApi === "null") {
+        return { nombre: "A Definir", bandera: "https://upload.wikimedia.org/wikipedia/commons/a/ad/Placeholder_no_text.svg" };
     }
-    
-    // SI NO LO ENCUENTRA:
-    // Imprime en consola el nombre raro que llega para que sepas cuál agregar
-    console.warn("País no encontrado en diccionario:", nombreApi);
-    
-    // Retorna el mismo nombre y una bandera genérica (placeholder)
-    return { 
-        nombre: nombreApi, 
-        bandera: "https://upload.wikimedia.org/wikipedia/commons/a/ad/Placeholder_no_text.svg" 
-    };
+    const info = diccionarioPaises[nombreApi];
+    if (info) return { nombre: info.es, bandera: `https://flagcdn.com/w80/${info.flag}.png` };
+    console.log("Falta agregar al diccionario:", nombreApi);
+    return { nombre: nombreApi, bandera: "https://upload.wikimedia.org/wikipedia/commons/a/ad/Placeholder_no_text.svg" };
 }
-// ------------------------------------------------------------------
-// AUTENTICACIÓN LIBRE (LOGIN Y REGISTRO AUTOMÁTICO)
-// ------------------------------------------------------------------
 
-loginForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value.toLowerCase().trim();
-    const password = document.getElementById('password').value;
+function traducirInstancia(faseApi) {
+    if (!faseApi) return 'A confirmar';
+    const diccionarioFases = {
+        'GROUP_STAGE': 'Fase de Grupos',
+        'LAST_16': 'Octavos de Final',
+        'QUARTER_FINALS': 'Cuartos de Final',
+        'SEMI_FINALS': 'Semifinales',
+        'THIRD_PLACE': 'Tercer Puesto',
+        'FINAL': 'La Gran Final'
+    };
+    return diccionarioFases[faseApi] || faseApi;
+}
 
-    // Intentamos iniciar sesión primero
-    signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-            // Limpiamos los campos al entrar
-            document.getElementById('email').value = '';
-            document.getElementById('password').value = '';
-        })
-        .catch((error) => {
-            // Si el correo no existe en la base, creamos la cuenta automáticamente
-            if(error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') {
-                createUserWithEmailAndPassword(auth, email, password)
-                    .then(() => {
-                        document.getElementById('email').value = '';
-                        document.getElementById('password').value = '';
-                        // Opcional: un mensajito de bienvenida
-                        console.log("Cuenta nueva creada exitosamente.");
-                    })
-                    .catch((err) => alert("Error al registrar la cuenta: " + err.message));
+// ------------------------------------------------------------------
+// AUTENTICACIÓN (LOGIN Y REGISTRO SEPARADOS)
+// ------------------------------------------------------------------
+let isLoginMode = true; 
+
+if (toggleAuth) {
+    toggleAuth.addEventListener('click', (e) => {
+        e.preventDefault();
+        isLoginMode = !isLoginMode; 
+        
+        if (isLoginMode) {
+            authTitle.innerText = "Iniciar Sesión";
+            groupNombre.style.display = "none";
+            authNombre.removeAttribute('required');
+            btnSubmit.innerText = "Ingresar";
+            toggleAuth.innerText = "¿No tienes cuenta? Regístrate aquí";
+        } else {
+            authTitle.innerText = "Crear Cuenta";
+            groupNombre.style.display = "block";
+            authNombre.setAttribute('required', 'true');
+            btnSubmit.innerText = "Registrarse";
+            toggleAuth.innerText = "¿Ya tienes cuenta? Ingresa aquí";
+        }
+    });
+}
+
+if (authForm) {
+    authForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('auth-email').value.toLowerCase().trim();
+        const pass = document.getElementById('auth-password').value;
+        const nombre = authNombre.value.trim();
+
+        try {
+            if (isLoginMode) {
+                // MODO INGRESO
+                await signInWithEmailAndPassword(auth, email, pass);
             } else {
-                // Si la contraseña está mal u otro error
-                alert("Error al acceder: " + error.message);
+                // MODO REGISTRO
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                const user = userCredential.user;
+                
+                // Guardamos el apodo en la base de datos
+                await setDoc(doc(db, "Perfiles", user.uid), {
+                    nombre: nombre || "Participante",
+                    email: user.email
+                });
             }
-        });
-});
+            authForm.reset();
+        } catch (error) {
+            console.error("Error:", error);
+            if (error.code === 'auth/email-already-in-use') {
+                alert("Este email ya está registrado. Por favor, haz clic en 'Ingresa aquí'.");
+            } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                alert("Email o contraseña incorrectos.");
+            } else if (error.code === 'auth/weak-password') {
+                alert("La contraseña debe tener al menos 6 caracteres.");
+            } else {
+                alert("Error: " + error.message);
+            }
+        }
+    });
+}
 
 btnLogout.addEventListener('click', () => signOut(auth));
 
@@ -147,32 +203,14 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         authSection.classList.add('hidden');
         appContent.classList.remove('hidden');
-        mainNav.classList.remove('hidden');
         
-        // Control de Nombre/Apodo de pantalla
+        // Verificamos el perfil por si es un usuario que ya existía antes de esta actualización
         const perfilRef = doc(db, "Perfiles", user.uid);
         const perfilSnap = await getDoc(perfilRef);
         
         if (!perfilSnap.exists()) {
-            // 1. Primero intenta leer lo que el usuario escribió en el cajón de "Alias"
-            let aliasInput = document.getElementById('alias')?.value.trim();
-            let apodo = aliasInput;
-
-            // 2. Si el cajón estaba vacío, lanza el cartelito
-            if (!apodo || apodo === "") {
-                apodo = prompt("¡Bienvenido al Prode! Ingresá tu nombre o apodo para la tabla de posiciones:");
-            }
-            
-            // 3. Si cerró el cartel o tampoco puso nada, usa la primera parte de su email
-            if (!apodo || apodo.trim() === "") {
-                apodo = user.email.split('@')[0];
-            }
-            
-            // Guarda el perfil en la base de datos
-            await setDoc(perfilRef, { nombre: apodo.trim(), email: user.email });
-            
-            // Limpia el campo del formulario para que no quede escrito
-            if (document.getElementById('alias')) document.getElementById('alias').value = '';
+            let apodo = user.email.split('@')[0]; // Fallback de seguridad
+            await setDoc(perfilRef, { nombre: apodo, email: user.email });
         }
 
         renderFixture();
@@ -180,14 +218,26 @@ onAuthStateChanged(auth, async (user) => {
     } else {
         authSection.classList.remove('hidden');
         appContent.classList.add('hidden');
-        mainNav.classList.add('hidden');
+    }
+});
+
+// ------------------------------------------------------------------
+// VER CONTRASEÑA (OJO)
+// ------------------------------------------------------------------
+document.getElementById('btn-toggle-pass')?.addEventListener('click', function() {
+    const passInput = document.getElementById('auth-password'); // Actualizado al nuevo ID
+    if (passInput && passInput.type === 'password') {
+        passInput.type = 'text';
+        this.textContent = '🙈';
+    } else if (passInput) {
+        passInput.type = 'password';
+        this.textContent = '👁️';
     }
 });
 
 // ------------------------------------------------------------------
 // FIXTURE CON REGLAS DE TIEMPO Y MARCADORES REALES
 // ------------------------------------------------------------------
-
 async function renderFixture() {
     const user = auth.currentUser;
     matchesContainer.innerHTML = '<p>Cargando partidos...</p>';
@@ -228,36 +278,24 @@ async function renderFixture() {
             const estaBloqueado = yaEmpezo || faltaMucho;
             const esFinalizado = match.estado === "FT" || match.estado === "Finalizado" || match.estado === "FINISHED";
 
-            // Fechas en español
             const diaLegible = fechaObj.toLocaleDateString('es-AR', { weekday: 'long', day: '2-digit', month: 'long' });
             const horaLegible = fechaObj.toLocaleTimeString('es-AR', { hour: '2-digit', minute:'2-digit' });
 
-            // Lógica de separación visual por día
             if (diaLegible !== diaActual) {
                 if (diaActual !== "") {
-                    // Cerramos el contenedor del día anterior y agregamos su botón
                     htmlHTML += `<button class="btn-guardar-dia" style="width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 30px;">Guardar Predicciones del Día</button></div>`;
                 }
-                // Abrimos un nuevo grupo de día
                 htmlHTML += `<div class="dia-grupo"><h3 style="background:#eee; padding:10px; border-radius:5px; margin-top:20px; text-transform: uppercase;">${diaLegible}</h3>`;
                 diaActual = diaLegible;
             }
 
-            const btnInfo = `<button type="button" class="btn-info" data-id="${match.id_partido}" style="background:none; border:none; cursor:pointer; font-size:1.1rem; margin-left:10px;" title="Ver información del partido">ℹ️</button>`;
+            const btnInfo = `<button type="button" class="btn-info" data-id="${match.id_partido}" style="background: #34495e; color: white; border: none; border-radius: 4px; padding: 4px 10px; font-size: 0.8rem; font-weight: bold; cursor: pointer; margin-left: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" title="Ver estadio y fase">🏟️ Ver Info</button>`;
             let infoEstado = `${horaLegible} hs - Estado: ${match.estado} ${btnInfo}`;
-
-            // SOLUCIÓN: Declaración de la variable para evitar el ReferenceError
             let inputsHtml = ""; 
 
             if (esFinalizado) {
                 infoEstado = `${horaLegible} hs - <strong style="color: #2ecc71;">FINALIZADO</strong> ${btnInfo}`;
-                inputsHtml = `
-                    <div class="prediction-inputs">
-                        <span class="real-score-display">${match.goles_local}</span>
-                        <span>vs</span>
-                        <span class="real-score-display">${match.goles_visitante}</span>
-                    </div>
-                `;
+                inputsHtml = `<div class="prediction-inputs"><span class="real-score-display">${match.goles_local}</span><span>vs</span><span class="real-score-display">${match.goles_visitante}</span></div>`;
             } else {
                 if (yaEmpezo) {
                     infoEstado = `${horaLegible} hs - <strong style="color: #e74c3c;">CERRADO (En juego)</strong> ${btnInfo}`;
@@ -276,7 +314,6 @@ async function renderFixture() {
                 `;
             }
 
-           // Traducimos los nombres y obtenemos las banderas
             const localInfo = obtenerInfoPais(match.equipo_local);
             const visitanteInfo = obtenerInfoPais(match.equipo_visitante);
 
@@ -284,32 +321,27 @@ async function renderFixture() {
                 <div class="match-card" data-id="${match.id_partido}">
                     <div class="match-info">${infoEstado}</div>
                     <div class="match-teams">
-                        
                         <div class="team local">
                             <span class="team-name">${localInfo.nombre}</span>
                             <img src="${localInfo.bandera}" class="flag-icon" alt="Bandera">
                         </div>
-                        
                         ${inputsHtml}
-                        
                         <div class="team visitante">
                             <img src="${visitanteInfo.bandera}" class="flag-icon" alt="Bandera">
                             <span class="team-name">${visitanteInfo.nombre}</span>
                         </div>
-
                     </div>
                     ${miPred && esFinalizado ? `<div style="text-align:center; font-size:12px; margin-top:5px; color:#aaa;">Tu predicción: ${miPred.prediccion_local} - ${miPred.prediccion_visitante}</div>` : ''}
                     
                     <div id="info-${match.id_partido}" class="hidden" style="width: 100%; background: #f0f3f4; padding: 10px; margin-top: 15px; border-radius: 5px; font-size: 0.9rem; color: #2c3e50;">
-                        🏟️ <strong>Sede/Estadio:</strong> ${match.estadio || 'No disponible'} <br>
-                        🏆 <strong>Instancia:</strong> ${match.fase || 'Fase de Grupos'}
+                        🏟️ <strong>Sede/Lugar:</strong> ${match.venue || match.estadio || 'Sede a confirmar'} <br>
+                        🏆 <strong>Instancia:</strong> ${traducirInstancia(match.stage || match.fase)}
                     </div>
                 </div>
             `;
             htmlHTML += matchHtml;
         });
 
-        // Asegurarnos de agregar el botón al último día de la lista
         if (diaActual !== "") {
             htmlHTML += `<button class="btn-guardar-dia" style="width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 30px;">Guardar Predicciones del Día</button></div>`;
         }
@@ -324,27 +356,18 @@ async function renderFixture() {
 // ------------------------------------------------------------------
 // GUARDAR PREDICCIONES (FILTRADO POR FECHA)
 // ------------------------------------------------------------------
-
-// Escuchamos los clics en todo el contenedor de partidos
-// Escuchamos los clics en todo el contenedor de partidos
 matchesContainer.addEventListener('click', async (e) => {
-    
-    // 1. LÓGICA PARA EL BOTÓN DE INFO (Totalmente separada)
     if (e.target.classList.contains('btn-info')) {
         const matchId = e.target.getAttribute('data-id');
         const infoPanel = document.getElementById(`info-${matchId}`);
-        if (infoPanel) {
-            infoPanel.classList.toggle('hidden'); // Lo muestra u oculta
-        }
-        return; // Cortamos acá para que no siga leyendo lo de abajo
+        if (infoPanel) infoPanel.classList.toggle('hidden'); 
+        return; 
     }
 
-    // 2. LÓGICA PARA EL BOTÓN DE "GUARDAR DÍA"
     if (e.target.classList.contains('btn-guardar-dia')) {
         const user = auth.currentUser;
         if (!user) return;
 
-        // Encerramos la búsqueda SOLO en el bloque del día al que le hicimos clic
         const diaGrupo = e.target.closest('.dia-grupo');
         const matchCards = diaGrupo.querySelectorAll('.match-card');
         let guardados = 0;
@@ -406,7 +429,6 @@ matchesContainer.addEventListener('click', async (e) => {
 // ------------------------------------------------------------------
 // MOTOR DE CÁLCULO Y TABLA DE POSICIONES EN TIEMPO REAL
 // ------------------------------------------------------------------
-
 function calcularPuntos(prediccionLocal, prediccionVisitante, resultadoLocal, resultadoVisitante) {
     if (prediccionLocal === resultadoLocal && prediccionVisitante === resultadoVisitante) return 3;
     if (Math.sign(prediccionLocal - prediccionVisitante) === Math.sign(resultadoLocal - resultadoVisitante)) return 1;
@@ -447,10 +469,25 @@ async function renderRanking() {
         })).sort((a, b) => b.puntos - a.puntos);
 
         rankingTableBody.innerHTML = '';
+        
         listaRanking.forEach((u, idx) => {
+            let rowStyle = "";
+            let medalla = `<strong>${idx + 1}°</strong>`;
+
+            if (idx === 0) {
+                rowStyle = "background-color: #ffd70033; font-weight: bold;"; 
+                medalla = "🥇 1°";
+            } else if (idx === 1) {
+                rowStyle = "background-color: #c0c0c033; font-weight: bold;"; 
+                medalla = "🥈 2°";
+            } else if (idx === 2) {
+                rowStyle = "background-color: #cd7f3233; font-weight: bold;"; 
+                medalla = "🥉 3°";
+            }
+
             rankingTableBody.insertAdjacentHTML('beforeend', `
-                <tr>
-                    <td><strong>${idx + 1}°</strong></td>
+                <tr style="${rowStyle}">
+                    <td>${medalla}</td>
                     <td>${u.nombre}</td>
                     <td>${u.puntos} pts</td>
                 </tr>
@@ -463,13 +500,8 @@ async function renderRanking() {
 }
 
 // ------------------------------------------------------------------
-// NAVEGACIÓN
-// ------------------------------------------------------------------
-
-// ------------------------------------------------------------------
 // PESTAÑAS Y DATOS OFICIALES (GRUPOS Y GOLEADORES)
 // ------------------------------------------------------------------
-
 function switchView(targetSection, targetButton) {
     [fixtureSection, rankingSection, gruposSection, goleadoresSection].forEach(s => {
         if(s) s.classList.add('hidden');
@@ -530,19 +562,3 @@ async function renderGoleadores() {
         }
     } catch (e) { console.error(e); }
 }
-
-btnFixture.addEventListener('click', () => switchView(fixtureSection, btnFixture));
-btnRanking.addEventListener('click', () => { switchView(rankingSection, btnRanking); renderRanking(); });
-// ------------------------------------------------------------------
-// VER CONTRASEÑA (OJO)
-// ------------------------------------------------------------------
-document.getElementById('btn-toggle-pass')?.addEventListener('click', function() {
-    const passInput = document.getElementById('password');
-    if (passInput.type === 'password') {
-        passInput.type = 'text';
-        this.textContent = '🙈'; // Cambia el ícono cuando se ve
-    } else {
-        passInput.type = 'password';
-        this.textContent = '👁️'; // Vuelve al ojo normal
-    }
-});

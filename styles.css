@@ -1,3 +1,6 @@
+/* =========================================
+   1. VARIABLES Y BASE
+   ========================================= */
 :root {
     --primary-color: #1a5276;
     --secondary-color: #2ecc71;
@@ -7,11 +10,7 @@
     --border-color: #d5dbdb;
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
     font-family: Arial, sans-serif;
@@ -20,198 +19,85 @@ body {
     line-height: 1.6;
 }
 
-header {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 1rem;
-    text-align: center;
-}
+.container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+.card { background: var(--card-background); padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.hidden { display: none !important; }
 
-header h1 {
-    margin-bottom: 0.5rem;
+/* =========================================
+   2. HEADER Y NAVEGACIÓN (SIEMPRE VISIBLE)
+   ========================================= */
+header { background-color: var(--primary-color); color: white; padding: 1rem; text-align: center; }
+header h1 { margin-bottom: 0.8rem; font-size: 1.5rem; }
+
+#main-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap; /* Clave: si no entran en la pantalla, bajan a la otra línea ordenados */
+    gap: 5px;
 }
 
 nav button {
     background: transparent;
     border: 1px solid white;
     color: white;
-    padding: 0.5rem 1rem;
-    margin: 0 0.25rem;
-    cursor: pointer;
-    border-radius: 4px;
-    font-weight: bold;
-}
-
-nav button.active, nav button:hover {
-    background-color: white;
-    color: var(--primary-color);
-}
-
-.container {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-}
-
-.card {
-    background: var(--card-background);
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.hidden {
-    display: none !important;
-}
-
-.form-group {
-    margin-bottom: 1.2rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.4rem;
-    font-weight: bold;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 0.6rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-}
-
-/* DISEÑO MODERNO UNIFICADO PARA EL BOTÓN PRINCIPAL */
-button.btn-block, 
-#auth-section button[type="submit"] {
-    width: 100%;
-    padding: 15px;
-    background: linear-gradient(135deg, #2ecc71 0%, #3498db 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.1s ease, box-shadow 0.2s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-button.btn-block:hover, 
-#auth-section button[type="submit"]:hover {
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-    opacity: 1;
-}
-
-button.btn-block:active, 
-#auth-section button[type="submit"]:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Estilos para las tarjetas de partidos */
-.match-card {
-    background: white;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.match-info {
+    padding: 0.4rem 0.8rem;
     font-size: 0.85rem;
-    color: #7f8c8d;
-    width: 100%;
-    margin-bottom: 0.5rem;
-}
-
-.match-teams {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-}
-
-.team {
-    flex: 1;
-    font-weight: bold;
-}
-
-.team.local { text-align: right; margin-right: 1rem; }
-.team.visitante { text-align: left; margin-left: 1rem; }
-
-.prediction-inputs {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.prediction-inputs input {
-    width: 50px;
-    text-align: center;
-    padding: 0.4rem;
-    font-size: 1.1rem;
-    border: 1px solid var(--border-color);
+    cursor: pointer;
     border-radius: 4px;
-}
-
-/* Estilos de Tabla */
-.table-responsive {
-    overflow-x: auto;
-    margin-top: 1rem;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-}
-
-th, td {
-    padding: 0.8rem;
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-}
-
-th {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-tbody tr:hover {
-    background-color: #f2f4f4;
-}
-/* DISEÑO DE BANDERAS CIRCULARES Y ALINEACIÓN */
-.flag-icon {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%; /* Esto hace el círculo perfecto */
-    object-fit: cover; /* Evita que la bandera se deforme */
-    margin: 0 10px;
-    border: 1px solid #ddd;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.team {
-    display: flex;
-    align-items: center;
-    flex: 1;
-}
-
-.team.local {
-    justify-content: flex-end;
-}
-
-.team.visitante {
-    justify-content: flex-start;
-}
-
-.team-name {
     font-weight: bold;
+    white-space: nowrap;
 }
+
+nav button.active, nav button:hover { background-color: white; color: var(--primary-color); }
+
+/* =========================================
+   3. FORMULARIOS Y BOTONES PRINCIPALES
+   ========================================= */
+.form-group { margin-bottom: 1.2rem; }
+.form-group label { display: block; margin-bottom: 0.4rem; font-weight: bold; }
+.form-group input { width: 100%; padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 4px; }
+
+button.btn-block {
+    width: 100%; padding: 15px; background: linear-gradient(135deg, #2ecc71 0%, #3498db 100%);
+    color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold;
+    cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.1s ease, box-shadow 0.2s ease; margin-top: 10px;
+}
+
+button.btn-block:hover { box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); filter: brightness(1.1); }
+button.btn-block:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+
+/* =========================================
+   4. TARJETAS DE PARTIDOS Y EQUIPOS
+   ========================================= */
+.match-card {
+    background: white; border: 1px solid var(--border-color); border-radius: 6px;
+    padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap;
+}
+
+.match-info { font-size: 0.8rem; color: #7f8c8d; width: 100%; margin-bottom: 0.5rem; }
+.match-teams { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+
+.team { display: flex; align-items: center; flex: 1; font-weight: bold; }
+.team.local { justify-content: flex-end; text-align: right; }
+.team.visitante { justify-content: flex-start; text-align: left; }
+
+.team-name { white-space: normal; font-size: 0.9rem; line-height: 1.2; margin: 0 8px; }
+
+.flag-icon { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; }
+
+.prediction-inputs { display: flex; align-items: center; gap: 0.5rem; }
+.prediction-inputs input { width: 45px; text-align: center; padding: 0.3rem; font-size: 1rem; border: 1px solid var(--border-color); border-radius: 4px; }
+
+/* =========================================
+   5. TABLAS DE POSICIONES
+   ========================================= */
+.table-responsive { overflow-x: auto; margin-top: 1rem; }
+table { width: 100%; border-collapse: collapse; background: white; }
+th, td { padding: 0.7rem; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
+th { background-color: var(--primary-color); color: white; }
+tbody tr:hover { background-color: #f2f4f4; }
+
+/* =================================
