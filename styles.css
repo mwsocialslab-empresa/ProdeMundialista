@@ -1,13 +1,13 @@
 /* =========================================
-   1. VARIABLES Y BASE
+   1. VARIABLES Y BASE (TEMÁTICA ARGENTINA 🇦🇷)
    ========================================= */
 :root {
-    --primary-color: #1a5276;
-    --secondary-color: #2ecc71;
-    --background-color: #f4f6f7;
-    --card-background: #ffffff;
-    --text-color: #2c3e50;
-    --border-color: #d5dbdb;
+    --primary-color: #43A1D5; /* Celeste Argentina */
+    --secondary-color: #D4AF37; /* Dorado Copa del Mundo */
+    --background-color: #EAF2F8; /* Celeste muy clarito */
+    --card-background: #ffffff; /* Blanco puro */
+    --text-color: #002753; /* Azul Oscuro AFA */
+    --border-color: #B3D4E6; /* Borde celeste tenue */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,84 +20,123 @@ body {
 }
 
 .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-.card { background: var(--card-background); padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.card { background: var(--card-background); padding: 2rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,39,83,0.1); border-top: 4px solid var(--primary-color); }
 .hidden { display: none !important; }
 
 /* =========================================
-   2. HEADER Y NAVEGACIÓN (SIEMPRE VISIBLE)
+   2. HEADER Y NAVEGACIÓN
    ========================================= */
-header { background-color: var(--primary-color); color: white; padding: 1rem; text-align: center; }
-header h1 { margin-bottom: 0.8rem; font-size: 1.5rem; }
+header { background: linear-gradient(135deg, #43A1D5 0%, #002753 100%); color: white; padding: 1rem; text-align: center; border-bottom: 3px solid var(--secondary-color); }
+header h1 { margin-bottom: 0.8rem; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
 
-#main-nav {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap; /* Clave: si no entran en la pantalla, bajan a la otra línea ordenados */
-    gap: 5px;
-}
+#main-nav { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 5px; }
 
 nav button {
-    background: transparent;
-    border: 1px solid white;
-    color: white;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
-    cursor: pointer;
-    border-radius: 4px;
-    font-weight: bold;
-    white-space: nowrap;
+    background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.5);
+    color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem; cursor: pointer;
+    border-radius: 20px; font-weight: bold; white-space: nowrap; transition: 0.2s;
 }
 
-nav button.active, nav button:hover { background-color: white; color: var(--primary-color); }
+nav button.active, nav button:hover { background-color: var(--secondary-color); color: var(--text-color); border-color: var(--secondary-color); }
 
 /* =========================================
    3. FORMULARIOS Y BOTONES PRINCIPALES
    ========================================= */
 .form-group { margin-bottom: 1.2rem; }
-.form-group label { display: block; margin-bottom: 0.4rem; font-weight: bold; }
-.form-group input { width: 100%; padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 4px; }
+.form-group label { display: block; margin-bottom: 0.4rem; font-weight: bold; color: var(--text-color); }
+.form-group input { width: 100%; padding: 0.6rem; border: 2px solid var(--border-color); border-radius: 4px; color: var(--text-color); font-weight: bold; }
+.form-group input:focus { outline: none; border-color: var(--primary-color); }
 
-button.btn-block {
-    width: 100%; padding: 15px; background: linear-gradient(135deg, #2ecc71 0%, #3498db 100%);
+button.btn-block, .btn-guardar-dia {
+    width: 100%; padding: 15px; 
+    background: linear-gradient(135deg, #43A1D5 0%, #002753 100%);
     color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold;
-    cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.1s ease, box-shadow 0.2s ease; margin-top: 10px;
+    cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.1s ease, box-shadow 0.2s ease; margin-top: 10px; border-bottom: 3px solid var(--secondary-color);
 }
 
-button.btn-block:hover { box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); filter: brightness(1.1); }
-button.btn-block:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+button.btn-block:hover, .btn-guardar-dia:hover { filter: brightness(1.1); }
+button.btn-block:active, .btn-guardar-dia:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
 
 /* =========================================
-   4. TARJETAS DE PARTIDOS Y EQUIPOS
+   4. POPUP / MODAL PERSONALIZADO (ARGENTINA)
+   ========================================= */
+#custom-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 39, 83, 0.8); /* Fondo Azul AFA con transparencia */
+    display: flex; justify-content: center; align-items: center; z-index: 9999;
+}
+
+.modal-content {
+    background: white; width: 90%; max-width: 350px; border-radius: 12px;
+    text-align: center; padding: 20px;
+    border-top: 8px solid var(--primary-color);
+    border-bottom: 8px solid var(--primary-color);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    animation: saltar 0.3s ease-out;
+}
+
+@keyframes saltar { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+.modal-header { font-size: 1.8rem; margin-bottom: 15px; letter-spacing: 5px; }
+.modal-body { color: var(--text-color); font-weight: bold; margin-bottom: 20px; font-size: 1.1rem; line-height: 1.4; }
+
+#modal-btn {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, #B8962E 100%);
+    color: #002753; border: none; padding: 10px 30px; font-weight: bold; font-size: 1.1rem;
+    border-radius: 25px; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+/* =========================================
+   5. TARJETAS DE PARTIDOS Y EQUIPOS
    ========================================= */
 .match-card {
     background: white; border: 1px solid var(--border-color); border-radius: 6px;
     padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between;
-    align-items: center; flex-wrap: wrap;
+    align-items: center; flex-wrap: wrap; border-left: 4px solid var(--primary-color);
 }
 
-.match-info { font-size: 0.8rem; color: #7f8c8d; width: 100%; margin-bottom: 0.5rem; }
+.match-info { font-size: 0.8rem; color: #555; width: 100%; margin-bottom: 0.5rem; font-weight: bold; }
 .match-teams { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 
-.team { display: flex; align-items: center; flex: 1; font-weight: bold; }
+.team { display: flex; align-items: center; flex: 1; font-weight: bold; color: var(--text-color); }
 .team.local { justify-content: flex-end; text-align: right; }
 .team.visitante { justify-content: flex-start; text-align: left; }
+.team-name { white-space: normal; font-size: 0.9rem; line-height: 1.2; margin: 0 8px; text-transform: uppercase; }
 
-.team-name { white-space: normal; font-size: 0.9rem; line-height: 1.2; margin: 0 8px; }
-
-.flag-icon { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; }
+.flag-icon { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; }
 
 .prediction-inputs { display: flex; align-items: center; gap: 0.5rem; }
-.prediction-inputs input { width: 45px; text-align: center; padding: 0.3rem; font-size: 1rem; border: 1px solid var(--border-color); border-radius: 4px; }
+.prediction-inputs input { 
+    width: 45px; text-align: center; padding: 0.3rem; font-size: 1.1rem; font-weight: bold;
+    border: 2px solid var(--border-color); border-radius: 4px; color: var(--text-color); 
+}
+.prediction-inputs input:focus { border-color: var(--secondary-color); outline: none; }
+.real-score-display { font-size: 1.2rem; font-weight: bold; color: var(--text-color); padding: 0 5px; }
 
 /* =========================================
-   5. TABLAS DE POSICIONES
+   6. TABLAS DE POSICIONES
    ========================================= */
-.table-responsive { overflow-x: auto; margin-top: 1rem; }
+.table-responsive { overflow-x: auto; margin-top: 1rem; border-radius: 6px; border: 1px solid var(--border-color); }
 table { width: 100%; border-collapse: collapse; background: white; }
 th, td { padding: 0.7rem; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
-th { background-color: var(--primary-color); color: white; }
-tbody tr:hover { background-color: #f2f4f4; }
+th { background-color: var(--text-color); color: white; text-transform: uppercase; }
+tbody tr:hover { background-color: #F0F6FA; }
 
-/* =================================
+/* =========================================
+   7. ADAPTACIÓN A CELULARES (RESPONSIVE)
+   ========================================= */
+@media (max-width: 768px) {
+    .container { padding: 0 10px; margin: 1rem auto; }
+    header h1 { font-size: 1.2rem; }
+    nav button { padding: 0.3rem 0.5rem; font-size: 0.75rem; }
+    
+    .match-card { padding: 0.8rem 0.5rem; }
+    .match-teams { gap: 5px; }
+    .team { flex-direction: column; text-align: center; gap: 3px; min-width: 0; }
+    .team.local, .team.visitante { margin: 0; justify-content: center; }
+    .team-name { font-size: 0.70rem; margin: 2px 0; }
+    .flag-icon { width: 26px; height: 26px; margin: 0; flex-shrink: 0; }
+    .prediction-inputs { flex-shrink: 0; gap: 0.2rem; }
+    .prediction-inputs input { width: 38px; padding: 0.3rem; font-size: 1rem; }
+}
