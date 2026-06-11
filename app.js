@@ -227,6 +227,9 @@ document.getElementById('btn-toggle-pass')?.addEventListener('click', function()
 // ------------------------------------------------------------------
 // FIXTURE CON REGLAS DE TIEMPO Y MARCADORES REALES
 // ------------------------------------------------------------------
+// ------------------------------------------------------------------
+// FIXTURE CON REGLAS DE TIEMPO Y MARCADORES REALES
+// ------------------------------------------------------------------
 async function renderFixture() {
     const user = auth.currentUser;
     matchesContainer.innerHTML = '<p style="text-align:center; font-weight:bold; color:var(--primary-color);">Cargando partidos...</p>';
@@ -281,10 +284,50 @@ async function renderFixture() {
             const btnInfo = `<button type="button" class="btn-info" data-id="${match.id_partido}" style="background: var(--text-color); color: white; border: none; border-radius: 4px; padding: 4px 10px; font-size: 0.8rem; font-weight: bold; cursor: pointer; margin-left: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" title="Ver estadio y fase">🏟️ Ver Info</button>`;
             let infoEstado = `${horaLegible} hs - Estado: ${match.estado} ${btnInfo}`;
             let inputsHtml = ""; 
+            let bannerResultadoOficial = "";
 
             if (esFinalizado) {
                 infoEstado = `${horaLegible} hs - <strong style="color: #2ecc71;">FINALIZADO</strong> ${btnInfo}`;
-                inputsHtml = `<div class="prediction-inputs"><span class="real-score-display">${match.goles_local}</span><span style="color:var(--primary-color);">vs</span><span class="real-score-display">${match.goles_visitante}</span></div>`;
+                
+                // Muestra la predicción del usuario pero bloqueada en gris punteado
+                inputsHtml = `
+                    <div class="prediction-inputs">
+                        <input type="number" value="${pLocal}" placeholder="-" class="input-local" disabled style="background: transparent; color: var(--text-color); border: 2px dashed #ccc; font-weight: bold;">
+                        <span style="color:var(--primary-color); font-weight:bold;">vs</span>
+                        <input type="number" value="${pVisitante}" placeholder="-" class="input-visitante" disabled style="background: transparent; color: var(--text-color); border: 2px dashed #ccc; font-weight: bold;">
+                    </div>
+                `;
+
+                // Cartel del resultado real y cálculo de puntos ganados
+                let ptsGanadosText = '';
+                if (miPred) {
+                    let pts = 0;
+                    const pL = parseInt(pLocal);
+                    const pV = parseInt(pVisitante);
+                    const rL = parseInt(match.goles_local);
+                    const rV = parseInt(match.goles_visitante);
+                    
+                    if (pL === rL && pV === rV) {
+                        pts = 4;
+                    } else if (Math.sign(pL - pV) === Math.sign(rL - rV)) {
+                        pts = (pL === pV) ? 1 : 3;
+                    }
+                    
+                    if (pts === 4) ptsGanadosText = `<br><span style="color: #27ae60; font-size: 0.9rem;">⭐ ¡Acierto exacto! Sumaste 4 pts</span>`;
+                    else if (pts === 3) ptsGanadosText = `<br><span style="color: #2980b9; font-size: 0.9rem;">✔️ ¡Acertaste el ganador! Sumaste 3 pts</span>`;
+                    else if (pts === 1) ptsGanadosText = `<br><span style="color: #e67e22; font-size: 0.9rem;">✔️ ¡Acertaste el empate! Sumaste 1 pt</span>`;
+                    else ptsGanadosText = `<br><span style="color: #c0392b; font-size: 0.9rem;">❌ No sumaste puntos</span>`;
+                } else {
+                    ptsGanadosText = `<br><span style="color: #7f8c8d; font-size: 0.9rem;">No participaste en este partido.</span>`;
+                }
+
+                bannerResultadoOficial = `
+                    <div style="width: 100%; text-align: center; margin-top: 15px; padding: 10px; background: rgba(212, 175, 55, 0.15); border: 2px solid var(--secondary-color); border-radius: 6px; color: var(--text-color); font-weight: bold;">
+                        🏆 Resultado Oficial: <span style="font-size: 1.2rem;">${match.goles_local} - ${match.goles_visitante}</span>
+                        ${ptsGanadosText}
+                    </div>
+                `;
+
             } else {
                 if (yaEmpezo) {
                     infoEstado = `${horaLegible} hs - <strong style="color: #e74c3c;">CERRADO (En juego)</strong> ${btnInfo}`;
@@ -320,7 +363,8 @@ async function renderFixture() {
                             <span class="team-name">${visitanteInfo.nombre}</span>
                         </div>
                     </div>
-                    ${miPred && esFinalizado ? `<div style="text-align:center; font-size:12px; margin-top:5px; color:#aaa;">Tu predicción: ${miPred.prediccion_local} - ${miPred.prediccion_visitante}</div>` : ''}
+                    
+                    ${bannerResultadoOficial}
                     
                     <div id="info-${match.id_partido}" class="hidden" style="width: 100%; background: var(--background-color); padding: 10px; margin-top: 15px; border-radius: 5px; font-size: 0.9rem; color: var(--text-color); border: 1px solid var(--border-color);">
                         🏟️ <strong>Sede/Lugar:</strong> ${match.venue || match.estadio || 'Sede a confirmar'} <br>
