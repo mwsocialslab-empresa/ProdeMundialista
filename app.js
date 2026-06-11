@@ -36,6 +36,8 @@ const gruposSection = document.getElementById('grupos-section');
 const goleadoresSection = document.getElementById('goleadores-section');
 const gruposContainer = document.getElementById('grupos-container');
 const goleadoresContainer = document.getElementById('goleadores-container');
+const btnReglas = document.getElementById('btn-reglas');
+const reglasSection = document.getElementById('reglas-section');
 
 // Elementos del DOM para Login y Registro
 const authForm = document.getElementById('auth-form');
@@ -521,11 +523,30 @@ async function renderRanking() {
 // ------------------------------------------------------------------
 // PESTAÑAS Y DATOS OFICIALES (GRUPOS Y GOLEADORES)
 // ------------------------------------------------------------------
+// ------------------------------------------------------------------
+// PESTAÑAS Y DATOS OFICIALES (GRUPOS, GOLEADORES Y REGLAS)
+// ------------------------------------------------------------------
 function switchView(targetSection, targetButton) {
-    [fixtureSection, rankingSection, gruposSection, goleadoresSection].forEach(s => { if(s) s.classList.add('hidden'); });
-    [btnFixture, btnRanking, btnGrupos, btnGoleadores].forEach(b => { if(b) b.classList.remove('active'); });
-    targetSection.classList.remove('hidden'); targetButton.classList.add('active');
+    // Apagamos TODAS las secciones (Agregamos reglasSection a la lista)
+    [fixtureSection, rankingSection, gruposSection, goleadoresSection, reglasSection].forEach(s => { 
+        if(s) s.classList.add('hidden'); 
+    });
+    // Sacamos el color activo de TODOS los botones (Agregamos btnReglas a la lista)
+    [btnFixture, btnRanking, btnGrupos, btnGoleadores, btnReglas].forEach(b => { 
+        if(b) b.classList.remove('active'); 
+    });
+    
+    // Prendemos solo la que tocaste
+    if(targetSection) targetSection.classList.remove('hidden'); 
+    if(targetButton) targetButton.classList.add('active');
 }
+
+// Escuchadores de clics de la barra de navegación
+if(btnFixture) btnFixture.addEventListener('click', () => switchView(fixtureSection, btnFixture));
+if(btnRanking) btnRanking.addEventListener('click', () => { switchView(rankingSection, btnRanking); renderRanking(); });
+if(btnGrupos) btnGrupos.addEventListener('click', () => { switchView(gruposSection, btnGrupos); renderGrupos(); });
+if(btnGoleadores) btnGoleadores.addEventListener('click', () => { switchView(goleadoresSection, btnGoleadores); renderGoleadores(); });
+if(btnReglas) btnReglas.addEventListener('click', () => switchView(reglasSection, btnReglas));
 
 btnFixture.addEventListener('click', () => switchView(fixtureSection, btnFixture));
 btnRanking.addEventListener('click', () => { switchView(rankingSection, btnRanking); renderRanking(); });

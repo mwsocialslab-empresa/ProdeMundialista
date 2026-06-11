@@ -16,7 +16,8 @@
         <button id="btn-ranking">Ranking</button>
         <button id="btn-grupos">Grupos</button>
         <button id="btn-goleadores">Goleadores</button>
-        <button id="btn-logout" style="background: #e74c3c;">Salir</button>
+        <button id="btn-reglas">Reglas</button>
+        <button id="btn-logout" style="background-color: #c0392b; border-color: #c0392b;">Salir</button>
     </nav>
 </header>
 
@@ -88,6 +89,32 @@
                 <h2>Máximos Goleadores</h2>
                 <div id="goleadores-container"></div>
             </section>
+            <section id="reglas-section" class="hidden card" style="margin-top: 20px;">
+    <h2 style="color: var(--primary-color); text-align: center; margin-bottom: 15px; text-transform: uppercase;">🏆 Condiciones de Juego</h2>
+    
+    <div style="line-height: 1.6; color: var(--text-color);">
+        <p>Bienvenido al Prode. Acá tenés las reglas claras para competir y sumar puntos:</p>
+        
+        <h3 style="color: var(--secondary-color); margin-top: 20px; margin-bottom: 10px;">⚽ Sistema de Puntuación</h3>
+        <ul style="list-style-type: none; padding: 0;">
+            <li style="background: rgba(212, 175, 55, 0.15); padding: 12px; margin-bottom: 8px; border-radius: 5px; border-left: 4px solid var(--secondary-color);">
+                <strong>⭐ 4 Puntos:</strong> Acierto exacto del resultado oficial. <br><em>(Ej: Pusiste 2-1 y terminó 2-1)</em>.
+            </li>
+            <li style="background: rgba(67, 161, 213, 0.1); padding: 12px; margin-bottom: 8px; border-radius: 5px; border-left: 4px solid var(--primary-color);">
+                <strong>✔️ 3 Puntos:</strong> Acertar al ganador del partido, pero no el resultado exacto. <br><em>(Ej: Pusiste 2-0 y terminó 1-0)</em>.
+            </li>
+            <li style="background: rgba(67, 161, 213, 0.1); padding: 12px; margin-bottom: 8px; border-radius: 5px; border-left: 4px solid var(--primary-color);">
+                <strong>✔️ 1 Punto:</strong> Acertar que el partido termina en empate, pero no el resultado exacto. <br><em>(Ej: Pusiste 1-1 y terminó 0-0)</em>.
+            </li>
+            <li style="background: #f9ebea; padding: 12px; border-radius: 5px; border-left: 4px solid #c0392b;">
+                <strong>❌ 0 Puntos:</strong> No acertar ni el ganador ni el empate.
+            </li>
+        </ul>
+
+        <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">⏳ Tiempos de Carga</h3>
+        <p>⚠️ <strong>Cierre de candado:</strong> Tenés tiempo para cargar o modificar tus resultados en cualquier momento mientras el estado del partido sea <strong>"ABIERTO"</strong>. Exactamente en el momento en que comienza el partido real, el casillero se bloquea automáticamente y ya no podrás editarlo.</p>
+    </div>
+</section>
 
         </div>
     </main>
