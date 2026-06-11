@@ -1,6 +1,6 @@
 // Importaciones de Firebase (Versión modular 10.x vía CDN)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, setDoc, collection, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // Configuración de Firebase
@@ -124,6 +124,39 @@ if (toggleAuth) {
     });
 }
 
+// ------------------------------------------------------------------
+// RECUPERACIÓN DE CONTRASEÑA
+// ------------------------------------------------------------------
+const forgotPassBtn = document.getElementById('forgot-pass-btn');
+
+if (forgotPassBtn) {
+    forgotPassBtn.addEventListener('click', async (e) => {
+        e.preventDefault(); 
+        
+        const email = document.getElementById('auth-email').value.toLowerCase().trim();
+        
+        if (!email) {
+            mostrarAlerta("⚠️ Por favor, escribí tu email en el casillero de arriba y tocá '¿Olvidaste tu contraseña?' de nuevo.");
+            return;
+        }
+
+        try {
+            await sendPasswordResetEmail(auth, email);
+            mostrarAlerta("📧 ¡Listo! Te enviamos un correo con los pasos para recuperar tu contraseña. (Revisá la carpeta de Spam o Correo no deseado por las dudas).");
+        } catch (error) {
+            console.error("Error al resetear contraseña:", error);
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
+                mostrarAlerta("❌ No encontramos ninguna cuenta registrada con ese correo.");
+            } else {
+                mostrarAlerta("Ocurrió un error. Intentá de nuevo más tarde.");
+            }
+        }
+    });
+}
+
+// ------------------------------------------------------------------
+// PROCESAMIENTO DEL FORMULARIO DE INGRESO / REGISTRO
+// ------------------------------------------------------------------
 if (authForm) {
     authForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -309,9 +342,6 @@ async function renderFixture() {
     }
 }
 
-// ------------------------------------------------------------------
-// GUARDAR PREDICCIONES (FILTRADO POR FECHA)
-// ------------------------------------------------------------------
 // ------------------------------------------------------------------
 // GUARDAR PREDICCIONES Y BOTONES DE INFO
 // ------------------------------------------------------------------
