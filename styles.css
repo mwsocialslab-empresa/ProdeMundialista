@@ -11,7 +11,13 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+/* --- BLOQUEO DE ZOOM EN INPUTS (Especial para celulares) --- */
+input, select, textarea {
+    font-size: 16px !important; /* El navegador no hace zoom si la letra es de 16px o más */
+    touch-action: manipulation; /* Mejora la respuesta táctil sin zoom */
+}
 
+/* También deshabilitamos el zoom global con meta tag si es necesario */
 body {
     font-family: Arial, sans-serif;
     background-color: var(--background-color);
