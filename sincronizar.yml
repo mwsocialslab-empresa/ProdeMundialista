@@ -17,11 +17,11 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Preparar entorno e Instalar Firebase
+      - name: Preparar entorno e Instalar Firebase Admin
         run: |
           npm init -y
           npm pkg set type="module" 
-          npm install firebase
+          npm install firebase-admin
 
       - name: Ejecutar Robot Sincronizador
         run: node sincronizador.js
