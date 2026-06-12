@@ -14,107 +14,95 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Tu nuevo token
 const API_TOKEN = "fec12f4d20f14353bbe9244c3ae44a11"; 
 
-async function sincronizarPartidos() {
-    console.log("⏱️ Conectando con football-data.org...");
-
+async function sincronizarTodo() {
+    console.log("⏱️ Iniciando sincronización general con football-data.org...");
+    
+    // 1. SINCRONIZAR PARTIDOS
     try {
-        // Consultamos los partidos del Mundial (WC)
         const response = await fetch('https://api.football-data.org/v4/competitions/WC/matches', {
             headers: { 'X-Auth-Token': API_TOKEN }
         });
         
-        if (!response.ok) throw new Error(`Error ${response.status}: ${await response.text()}`);
-        
+        if (!response.ok) throw new Error(`Error API Partidos ${response.status}`);
         const data = await response.json();
-        console.log("📡 Escribiendo resultados reales en Firebase...");
 
         for (const item of data.matches) {
+            // Convertimos los estados de la API a los que lee tu app web
+            let estadoFormateado = item.status;
+            if (item.status === "FINISHED" || item.status === "FT") estadoFormateado = "Finalizado";
+            if (item.status === "IN_PLAY" || item.status === "LIVE") estadoFormateado = "En juego";
+
             const partido = {
                 id_partido: item.id.toString(),
                 equipo_local: item.homeTeam.name,
                 equipo_visitante: item.awayTeam.name,
                 fecha_hora: item.utcDate,
-                estado: item.status,
-                goles_local: item.score.fullTime.home ?? 0,
-                goles_visitante: item.score.fullTime.away ?? 0,
-                // NUEVOS DATOS QUE TRAEMOS DE LA API
-                estadio: item.venue ?? "A confirmar",
-                fase: item.group ?? item.stage ?? "Mundial 2026"
+                estado: estadoFormateado,
+                goles_local: item.score.fullTime.home !== null ? parseInt(item.score.fullTime.home) : 0,
+                goles_visitante: item.score.fullTime.away !== null ? parseInt(item.score.fullTime.away) : 0,
+                estadio: item.venue || "A confirmar",
+                fase: item.group || item.stage || "Mundial 2026"
             };
 
             await setDoc(doc(db, "Partidos", partido.id_partido), partido, { merge: true });
-            console.log(`✅ Sincronizado: ${partido.equipo_local} vs ${partido.equipo_visitante}`);
         }
-
-        console.log("🚀 Sincronización finalizada exitosamente.");
-        process.exit(0);
-
+        console.log("✅ Partidos sincronizados perfectamente.");
     } catch (error) {
-        console.error("❌ Error durante la sincronización:", error.message);
-        process.exit(1);
+        console.error("❌ Error en partidos:", error.message);
     }
-}
 
-async function sincronizarExtra() {
+    // 2. SINCRONIZAR POSICIONES DE GRUPOS
     try {
-        console.log("Iniciando sincronización de Extras (Grupos y Goleadores)...");
+        const resPos = await fetch('https://api.football-data.org/v4/competitions/WC/standings', {
+            headers: { 'X-Auth-Token': API_TOKEN }
+        });
         
-        // 1. Intentar traer Posiciones de la API
-        try {
-            const resPos = await axios.get('http://api.football-data.org/v4/competitions/2000/standings', { headers });
-            const grupos = resPos.data.standings.filter(s => s.type === 'TOTAL');
+        if (resPos.ok) {
+            const dataPos = await resPos.json();
+            const grupos = dataPos.standings.filter(s => s.type === 'TOTAL');
             
             for (const g of grupos) {
-                await db.collection('Posiciones').doc(g.group).set({
-                    nombre: g.group,
+                await setDoc(doc(db, "Posiciones", g.group), {
+                    nombre: g.group.replace('_', ' '),
                     tabla: g.table.map(t => ({
                         equipo: t.team.name,
-                        puntos: t.points,
-                        pg: t.won, pe: t.draw, pp: t.lost, gf: t.goalsFor, gc: t.goalsAgainst,
-                        escudo: t.team.crest
+                        puntos: parseInt(t.points),
+                        pg: parseInt(t.won), pe: parseInt(t.draw), pp: parseInt(t.lost), 
+                        gf: parseInt(t.goalsFor), gc: parseInt(t.goalsAgainst),
+                        escudo: t.team.crest || 'https://upload.wikimedia.org/wikipedia/commons/a/ad/Placeholder_no_text.svg'
                     }))
                 });
             }
-        } catch (err) {
-            console.log("API no disponible para grupos. Creando Grupo de Argentina por defecto...");
-            // Datos de respaldo para que la pantalla no quede vacía
-            await db.collection('Posiciones').doc('GROUP_A').set({
-                nombre: 'GRUPO A',
-                tabla: [
-                    { equipo: 'Argentina', puntos: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, escudo: 'https://flagcdn.com/w80/ar.png' },
-                    { equipo: 'France', puntos: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, escudo: 'https://flagcdn.com/w80/fr.png' },
-                    { equipo: 'Germany', puntos: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, escudo: 'https://flagcdn.com/w80/de.png' },
-                    { equipo: 'Saudi Arabia', puntos: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, escudo: 'https://flagcdn.com/w80/sa.png' }
-                ]
-            });
+            console.log("✅ Tablas de posiciones de grupos actualizadas.");
         }
-        
-        // 2. Intentar traer Goleadores de la API
-        try {
-            const resGol = await axios.get('http://api.football-data.org/v4/competitions/2000/scorers', { headers });
-            const lista = resGol.data.scorers.map(s => ({
-                jugador: s.player.name, equipo: s.team.name, goles: s.goals
-            }));
-            await db.collection('Goleadores').doc('oficial').set({ top: lista });
-        } catch (err) {
-            console.log("API no disponible para goleadores. Creando lista inicial...");
-            // Lista de respaldo
-            await db.collection('Goleadores').doc('oficial').set({
-                top: [
-                    { jugador: 'Lionel Messi', equipo: 'Argentina', goles: 0 },
-                    { status: 'Torneo listo para iniciar' }
-                ]
-            });
-        }
-        
-        console.log("¡Proceso de Extras finalizado con éxito!");
-    } catch (error) {
-        console.log("Error general en sincronizarExtra:", error.message);
+    } catch (err) {
+        console.error("⚠️ Falló la carga dinámica de grupos:", err.message);
     }
+
+    // 3. SINCRONIZAR GOLEADORES
+    try {
+        const resGol = await fetch('https://api.football-data.org/v4/competitions/WC/scorers', {
+            headers: { 'X-Auth-Token': API_TOKEN }
+        });
+        
+        if (resGol.ok) {
+            const dataGol = await resGol.json();
+            const lista = dataGol.scorers.map(s => ({
+                jugador: s.player.name, 
+                equipo: s.team.name, 
+                goles: parseInt(s.goals)
+            }));
+            await setDoc(doc(db, "Goleadores", "oficial"), { top: lista });
+            console.log("✅ Tabla de goleadores actualizada.");
+        }
+    } catch (err) {
+        console.error("⚠️ Falló la carga de goleadores oficiales:", err.message);
+    }
+
+    console.log("🚀 Sincronización finalizada con éxito.");
+    process.exit(0);
 }
 
-// No te olvides de llamar a la función al final de tu script, 
-// junto a donde llamas a tu actual función de sincronizar partidos.
+sincronizarTodo();

@@ -57,7 +57,7 @@ function mostrarAlerta(mensaje) {
         modalMsg.innerText = mensaje;
         modal.classList.remove('hidden');
     } else {
-        alert(mensaje); // Fallback de seguridad
+        alert(mensaje);
     }
 }
 
@@ -101,7 +101,7 @@ function traducirInstancia(faseApi) {
 }
 
 // ------------------------------------------------------------------
-// AUTENTICACIÓN (LOGIN Y REGISTRO SEPARADOS)
+// AUTENTICACIÓN
 // ------------------------------------------------------------------
 let isLoginMode = true; 
 
@@ -109,7 +109,6 @@ if (toggleAuth) {
     toggleAuth.addEventListener('click', (e) => {
         e.preventDefault();
         isLoginMode = !isLoginMode; 
-        
         if (isLoginMode) {
             authTitle.innerText = "Iniciar Sesión";
             groupNombre.style.display = "none";
@@ -126,27 +125,20 @@ if (toggleAuth) {
     });
 }
 
-// ------------------------------------------------------------------
-// RECUPERACIÓN DE CONTRASEÑA
-// ------------------------------------------------------------------
 const forgotPassBtn = document.getElementById('forgot-pass-btn');
-
 if (forgotPassBtn) {
     forgotPassBtn.addEventListener('click', async (e) => {
         e.preventDefault(); 
-        
         const email = document.getElementById('auth-email').value.toLowerCase().trim();
-        
         if (!email) {
             mostrarAlerta("⚠️ Por favor, escribí tu email en el casillero de arriba y tocá '¿Olvidaste tu contraseña?' de nuevo.");
             return;
         }
-
         try {
             await sendPasswordResetEmail(auth, email);
             mostrarAlerta("📧 ¡Listo! Te enviamos un correo con los pasos para recuperar tu contraseña. (Revisá la carpeta de Spam o Correo no deseado por las dudas).");
         } catch (error) {
-            console.error("Error al resetear contraseña:", error);
+            console.error("Error:", error);
             if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
                 mostrarAlerta("❌ No encontramos ninguna cuenta registrada con ese correo.");
             } else {
@@ -156,13 +148,9 @@ if (forgotPassBtn) {
     });
 }
 
-// ------------------------------------------------------------------
-// PROCESAMIENTO DEL FORMULARIO DE INGRESO / REGISTRO
-// ------------------------------------------------------------------
 if (authForm) {
     authForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const textoOriginal = btnSubmit.innerText;
         btnSubmit.innerText = "Procesando...";
         btnSubmit.disabled = true;
@@ -198,7 +186,7 @@ if (authForm) {
     });
 }
 
-btnLogout.addEventListener('click', () => signOut(auth));
+if (btnLogout) btnLogout.addEventListener('click', () => signOut(auth));
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -219,7 +207,6 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// VER CONTRASEÑA (OJO)
 document.getElementById('btn-toggle-pass')?.addEventListener('click', function() {
     const passInput = document.getElementById('auth-password');
     if (passInput && passInput.type === 'password') { passInput.type = 'text'; this.textContent = '🙈'; } 
@@ -227,10 +214,7 @@ document.getElementById('btn-toggle-pass')?.addEventListener('click', function()
 });
 
 // ------------------------------------------------------------------
-// FIXTURE CON REGLAS DE TIEMPO Y MARCADORES REALES
-// ------------------------------------------------------------------
-// ------------------------------------------------------------------
-// FIXTURE CON REGLAS DE TIEMPO Y MARCADORES REALES
+// FIXTURE CON REGLAS DE TIEMPO
 // ------------------------------------------------------------------
 async function renderFixture() {
     const user = auth.currentUser;
@@ -290,8 +274,6 @@ async function renderFixture() {
 
             if (esFinalizado) {
                 infoEstado = `${horaLegible} hs - <strong style="color: #2ecc71;">FINALIZADO</strong> ${btnInfo}`;
-                
-                // Muestra la predicción del usuario pero bloqueada en gris punteado
                 inputsHtml = `
                     <div class="prediction-inputs">
                         <input type="number" value="${pLocal}" placeholder="-" class="input-local" disabled style="background: transparent; color: var(--text-color); border: 2px dashed #ccc; font-weight: bold;">
@@ -300,7 +282,6 @@ async function renderFixture() {
                     </div>
                 `;
 
-                // Cartel del resultado real y cálculo de puntos ganados
                 let ptsGanadosText = '';
                 if (miPred) {
                     let pts = 0;
@@ -329,7 +310,6 @@ async function renderFixture() {
                         ${ptsGanadosText}
                     </div>
                 `;
-
             } else {
                 if (yaEmpezo) {
                     infoEstado = `${horaLegible} hs - <strong style="color: #e74c3c;">CERRADO (En juego)</strong> ${btnInfo}`;
@@ -365,9 +345,7 @@ async function renderFixture() {
                             <span class="team-name">${visitanteInfo.nombre}</span>
                         </div>
                     </div>
-                    
                     ${bannerResultadoOficial}
-                    
                     <div id="info-${match.id_partido}" class="hidden" style="width: 100%; background: var(--background-color); padding: 10px; margin-top: 15px; border-radius: 5px; font-size: 0.9rem; color: var(--text-color); border: 1px solid var(--border-color);">
                         🏟️ <strong>Sede/Lugar:</strong> ${match.venue || match.estadio || 'Sede a confirmar'} <br>
                         🏆 <strong>Instancia:</strong> ${traducirInstancia(match.stage || match.fase)}
@@ -380,7 +358,6 @@ async function renderFixture() {
         if (diaActual !== "") {
             htmlHTML += `<button class="btn-guardar-dia">Guardar Predicciones del Día</button></div>`;
         }
-
         matchesContainer.innerHTML = htmlHTML;
     } catch (e) {
         console.error(e);
@@ -388,12 +365,7 @@ async function renderFixture() {
     }
 }
 
-// ------------------------------------------------------------------
-// GUARDAR PREDICCIONES Y BOTONES DE INFO
-// ------------------------------------------------------------------
 matchesContainer.addEventListener('click', async (e) => {
-    
-    // SOLUCIÓN BOTÓN INFO: Detecta el clic aunque toques el emoji o el texto
     const btnInfo = e.target.closest('.btn-info');
     if (btnInfo) {
         const matchId = btnInfo.getAttribute('data-id');
@@ -402,7 +374,6 @@ matchesContainer.addEventListener('click', async (e) => {
         return; 
     }
 
-    // SOLUCIÓN BOTÓN GUARDAR: Detecta el clic perfecto en el botón verde
     const btnGuardar = e.target.closest('.btn-guardar-dia');
     if (btnGuardar) {
         const user = auth.currentUser;
@@ -461,11 +432,16 @@ matchesContainer.addEventListener('click', async (e) => {
 });
 
 // ------------------------------------------------------------------
-// MOTOR DE CÁLCULO Y TABLA DE POSICIONES
+// MOTOR DE CÁLCULO Y RANKING
 // ------------------------------------------------------------------
 function calcularPuntos(prediccionLocal, prediccionVisitante, resultadoLocal, resultadoVisitante) {
-    if (prediccionLocal === resultadoLocal && prediccionVisitante === resultadoVisitante) return 3;
-    if (Math.sign(prediccionLocal - prediccionVisitante) === Math.sign(resultadoLocal - resultadoVisitante)) return 1;
+    const pL = parseInt(prediccionLocal);
+    const pV = parseInt(prediccionVisitante);
+    const rL = parseInt(resultadoLocal);
+    const rV = parseInt(resultadoVisitante);
+
+    if (pL === rL && pV === rV) return 4;
+    if (Math.sign(pL - pV) === Math.sign(rL - rV)) return (pL === pV) ? 1 : 3;
     return 0;
 }
 
@@ -503,11 +479,9 @@ async function renderRanking() {
         })).sort((a, b) => b.puntos - a.puntos);
 
         rankingTableBody.innerHTML = '';
-        
         listaRanking.forEach((u, idx) => {
             let rowStyle = "";
             let medalla = `<strong>${idx + 1}°</strong>`;
-
             if (idx === 0) { rowStyle = "background-color: rgba(212, 175, 55, 0.2); font-weight: bold;"; medalla = "🏆 1°"; } 
             else if (idx === 1) { rowStyle = "background-color: rgba(192, 192, 192, 0.2); font-weight: bold;"; medalla = "🥈 2°"; } 
             else if (idx === 2) { rowStyle = "background-color: rgba(205, 127, 50, 0.2); font-weight: bold;"; medalla = "🥉 3°"; }
@@ -521,37 +495,24 @@ async function renderRanking() {
 }
 
 // ------------------------------------------------------------------
-// PESTAÑAS Y DATOS OFICIALES (GRUPOS Y GOLEADORES)
-// ------------------------------------------------------------------
-// ------------------------------------------------------------------
-// PESTAÑAS Y DATOS OFICIALES (GRUPOS, GOLEADORES Y REGLAS)
+// VISTAS Y DATOS CACHÉ
 // ------------------------------------------------------------------
 function switchView(targetSection, targetButton) {
-    // Apagamos TODAS las secciones (Agregamos reglasSection a la lista)
-    [fixtureSection, rankingSection, gruposSection, goleadoresSection, reglasSection].forEach(s => { 
-        if(s) s.classList.add('hidden'); 
-    });
-    // Sacamos el color activo de TODOS los botones (Agregamos btnReglas a la lista)
-    [btnFixture, btnRanking, btnGrupos, btnGoleadores, btnReglas].forEach(b => { 
-        if(b) b.classList.remove('active'); 
-    });
-    
-    // Prendemos solo la que tocaste
+    [fixtureSection, rankingSection, gruposSection, goleadoresSection, reglasSection].forEach(s => { if(s) s.classList.add('hidden'); });
+    [btnFixture, btnRanking, btnGrupos, btnGoleadores, btnReglas].forEach(b => { if(b) b.classList.remove('active'); });
     if(targetSection) targetSection.classList.remove('hidden'); 
     if(targetButton) targetButton.classList.add('active');
 }
 
-// Escuchadores de clics de la barra de navegación
-if(btnFixture) btnFixture.addEventListener('click', () => switchView(fixtureSection, btnFixture));
-if(btnRanking) btnRanking.addEventListener('click', () => { switchView(rankingSection, btnRanking); renderRanking(); });
-if(btnGrupos) btnGrupos.addEventListener('click', () => { switchView(gruposSection, btnGrupos); renderGrupos(); });
-if(btnGoleadores) btnGoleadores.addEventListener('click', () => { switchView(goleadoresSection, btnGoleadores); renderGoleadores(); });
-if(btnReglas) btnReglas.addEventListener('click', () => switchView(reglasSection, btnReglas));
+let yaCargoRanking = false;
+let yaCargoGrupos = false;
+let yaCargoGoleadores = false;
 
-btnFixture.addEventListener('click', () => switchView(fixtureSection, btnFixture));
-btnRanking.addEventListener('click', () => { switchView(rankingSection, btnRanking); renderRanking(); });
-btnGrupos.addEventListener('click', () => { switchView(gruposSection, btnGrupos); renderGrupos(); });
-btnGoleadores.addEventListener('click', () => { switchView(goleadoresSection, btnGoleadores); renderGoleadores(); });
+if(btnFixture) btnFixture.addEventListener('click', () => switchView(fixtureSection, btnFixture));
+if(btnRanking) btnRanking.addEventListener('click', () => { switchView(rankingSection, btnRanking); if(!yaCargoRanking) { renderRanking(); yaCargoRanking = true; } });
+if(btnGrupos) btnGrupos.addEventListener('click', () => { switchView(gruposSection, btnGrupos); if(!yaCargoGrupos) { renderGrupos(); yaCargoGrupos = true; } });
+if(btnGoleadores) btnGoleadores.addEventListener('click', () => { switchView(goleadoresSection, btnGoleadores); if(!yaCargoGoleadores) { renderGoleadores(); yaCargoGoleadores = true; } });
+if(btnReglas) btnReglas.addEventListener('click', () => switchView(reglasSection, btnReglas));
 
 async function renderGrupos() {
     gruposContainer.innerHTML = '<p style="text-align:center; color:var(--primary-color); font-weight:bold;">Cargando posiciones...</p>';

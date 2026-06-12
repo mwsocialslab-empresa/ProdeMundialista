@@ -146,3 +146,11 @@ tbody tr:hover { background-color: #F0F6FA; }
     .prediction-inputs { flex-shrink: 0; gap: 0.2rem; }
     .prediction-inputs input { width: 38px; padding: 0.3rem; font-size: 1rem; }
 }
+
+/* =========================================
+   Para que se calculen los puntos del Ranking: Vas a la colección Partidos, buscás el de México vs. Sudáfrica, y le cambiás el estado a FINALIZADO con los goles oficiales (2 y 1). ¡Apenas guardes eso, el motor matemático de nuestra página hace el cálculo solo y le reparte los puntos a los que acertaron!
+
+Para los Grupos: Vas a la colección Posiciones y actualizás la tabla (sumándole los 3 puntos a México, los goles a favor, etc.).
+
+Para los Goleadores: Vas a la colección Goleadores y escribís los nombres de los que metieron los goles de hoy.
+   ========================================= */
