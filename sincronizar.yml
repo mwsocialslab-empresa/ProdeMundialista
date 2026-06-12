@@ -2,9 +2,8 @@ name: Sincronizador Automatico del Prode
 
 on:
   schedule:
-    # Se ejecuta de forma automática en la nube cada 1 hora
     - cron: '*/15 * * * *'
-  workflow_dispatch: # Te permite ejecutarlo a mano desde GitHub si querés forzarlo
+  workflow_dispatch:
 
 jobs:
   build:
@@ -16,10 +15,13 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v3
         with:
-          node-node-version: '18'
+          node-version: '18'
 
-      - name: Instalar dependencias de Firebase
-        run: npm install firebase
+      - name: Preparar entorno e Instalar Firebase
+        run: |
+          npm init -y
+          npm pkg set type="module" 
+          npm install firebase
 
       - name: Ejecutar Robot Sincronizador
         run: node sincronizador.js
