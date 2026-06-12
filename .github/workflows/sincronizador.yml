@@ -1,0 +1,27 @@
+name: Sincronizador Automatico del Prode
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar codigo del repositorio
+        uses: actions/checkout@v3
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Preparar entorno e Instalar Firebase
+        run: |
+          npm init -y
+          npm pkg set type="module" 
+          npm install firebase
+
+      - name: Ejecutar Robot Sincronizador
+        run: node sincronizador.js
