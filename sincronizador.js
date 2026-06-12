@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth"; // <-- IMPORTACIÓN AGREGADA
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 const firebaseConfig = {
     apiKey: "AIzaSyA63kXjc5_SFNeq1Bt4EPmIsHfc-oeWONU",
@@ -14,7 +14,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app); // <-- INICIALIZAMOS AUTH
+const auth = getAuth(app);
 
 const API_TOKEN = "fec12f4d20f14353bbe9244c3ae44a11"; 
 
@@ -23,11 +23,11 @@ async function sincronizarTodo() {
     
     // --- EL ROBOT INICIA SESIÓN ---
     try {
-        await signInWithEmailAndPassword(auth, "TU_CORREO", "TU_CONTRASEÑA");
+        await signInWithEmailAndPassword(auth, "mwsocialslab@gmail.com", "Calingasta30?");
         console.log("🔑 Robot autenticado correctamente.");
     } catch (error) {
         console.error("❌ Error al iniciar sesión el robot:", error.message);
-        process.exit(1); // Detenemos el script si no puede entrar
+        process.exit(1); 
     }
     // ------------------------------
     
