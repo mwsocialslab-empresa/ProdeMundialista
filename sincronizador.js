@@ -23,7 +23,7 @@ async function sincronizarTodo() {
     
     // --- EL ROBOT INICIA SESIÓN ---
     try {
-        await signInWithEmailAndPassword(auth, "mwsocialslab@gmail.com", "123456?");
+        await signInWithEmailAndPassword(auth, "waltergalelab@gmail.com", "Calingasta30?");
         console.log("🔑 Robot autenticado correctamente.");
     } catch (error) {
         console.error("❌ Error al iniciar sesión el robot:", error.message);
